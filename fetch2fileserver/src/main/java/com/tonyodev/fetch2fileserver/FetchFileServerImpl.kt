@@ -199,9 +199,9 @@ class FetchFileServerImpl(context: Context,
             }
         }
 
-        override fun onProgress(sessionId: String, fileRequest: FileRequest, fileResource: FileResource, progress: Int) {
+        override fun onProgress(sessionId: String, fileRequest: FileRequest, fileResource: FileResource, progress: Int, eta: Long, downloadedBytesPerSeconds: Long) {
             mainHandler.post {
-                fetchTransferListener?.onProgress(sessionId, fileRequest, fileResource, progress)
+                fetchTransferListener?.onProgress(sessionId, fileRequest, fileResource, progress, eta, downloadedBytesPerSeconds)
             }
         }
 

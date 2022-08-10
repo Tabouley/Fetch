@@ -92,10 +92,11 @@ class FetchFileResourceProvider(private val client: Socket,
                                                 val byteArray = ByteArray(FileResourceTransporter.BUFFER_SIZE)
                                                 val contentLength = (if (request.rangeEnd == -1L) fileResource.length else request.rangeEnd) - request.rangeStart
                                                 var remainderBytes = contentLength
+                                                var downloadedBytes = 0L
                                                 sendFileResourceResponse(contentLength, fileResource.md5)
                                                 var reportingStartTime = System.nanoTime()
                                                 var read = inputResourceWrapper?.read(byteArray)
-                                                        ?: -1
+                                                    ?: -1
                                                 var streamBytes: Int
                                                 fileResourceProviderDelegate.onStarted(sessionId, request, fileResource)
                                                 while (remainderBytes > 0L && read != -1 && !interrupted) {
@@ -108,19 +109,23 @@ class FetchFileResourceProvider(private val client: Socket,
                                                     transporter.sendRawBytes(byteArray, 0, streamBytes)
                                                     if (read != -1) {
                                                         remainderBytes -= streamBytes
+                                                        downloadedBytes += streamBytes
                                                         reportingStopTime = System.nanoTime()
                                                         val hasReportingTimeElapsed = hasIntervalTimeElapsed(reportingStartTime,
-                                                                reportingStopTime, progressReportingInMillis)
+                                                            reportingStopTime, progressReportingInMillis)
                                                         if (hasReportingTimeElapsed && !interrupted) {
                                                             val progress = calculateProgress(contentLength - remainderBytes, contentLength)
-                                                            fileResourceProviderDelegate.onProgress(sessionId, request, fileResource, progress)
+                                                            val downloadedBytesPerSeconds = downloadedBytes / ((reportingStopTime - reportingStartTime) / 1000000L)
+                                                            val eta = remainderBytes / downloadedBytesPerSeconds
+                                                            fileResourceProviderDelegate.onProgress(sessionId, request, fileResource, progress, eta, downloadedBytesPerSeconds)
                                                             reportingStartTime = System.nanoTime()
+                                                            downloadedBytes = 0L
                                                         }
                                                         read = inputResourceWrapper?.read(byteArray) ?: -1
                                                     }
                                                 }
                                                 if (remainderBytes == 0L && !interrupted) {
-                                                    fileResourceProviderDelegate.onProgress(sessionId, request, fileResource, 100)
+                                                    fileResourceProviderDelegate.onProgress(sessionId, request, fileResource, 100, 0, 0)
                                                     fileResourceProviderDelegate.onComplete(sessionId, request, fileResource)
                                                 }
                                             }

@@ -25,7 +25,7 @@ interface FileResourceProviderDelegate {
 
     fun onStarted(sessionId: String, fileRequest: FileRequest, fileResource: FileResource)
 
-    fun onProgress(sessionId: String, fileRequest: FileRequest, fileResource: FileResource, progress: Int)
+    fun onProgress(sessionId: String, fileRequest: FileRequest, fileResource: FileResource, progress: Int, eta: Long, downloadedBytesPerSeconds: Long)
 
     fun onComplete(sessionId: String, fileRequest: FileRequest, fileResource: FileResource)
 

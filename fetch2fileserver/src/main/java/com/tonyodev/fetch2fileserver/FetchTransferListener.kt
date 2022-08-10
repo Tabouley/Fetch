@@ -21,8 +21,10 @@ interface FetchTransferListener {
      * @param fileRequest File Request
      * @param fileResource file resource being transferred to client
      * @param progress Transfer progress
+     * @param eta Estimated time remaining in seconds
+     * @param downloadedBytesPerSeconds Download speed in bytes per second
      * */
-    fun onProgress(sessionId: String, fileRequest: FileRequest, fileResource: FileResource, progress: Int)
+    fun onProgress(sessionId: String, fileRequest: FileRequest, fileResource: FileResource, progress: Int, eta: Long, downloadedBytesPerSeconds: Long)
 
     /**
      * Method called to report the completed file resource transfer to a client.
